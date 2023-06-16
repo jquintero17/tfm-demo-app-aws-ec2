@@ -1,4 +1,8 @@
-#Update before user
+#Update before use
+variable cec {
+    default = "amansin3"
+}
+
 variable region {
     default = "us-east-1"
 }
@@ -9,20 +13,6 @@ variable az1 {
 #Update before user
 variable az2 {
     default = "us-east-1b"
-}
-
-variable user {
-    default = "wpuser"
-}
-
-variable password {
-    type = string
-    description = "SQL db Password"
-    default = "wpuser123$"
-}
-
-variable dbname {
-    default = "saferdsdb"
 }
 
 variable "images" {
@@ -43,5 +33,67 @@ variable "keyname" {
 #Update before user
 variable "csws3arn" {
     type    = string
-    default = "arn:aws:s3:::secureworkloadvpcflowbucket"
+    default = "arn:aws:s3:::amansin3-csw-tme-tenant"
+}
+
+
+#if you change cidr block make sure you update addresses in python and shell scripts.
+variable websubnet1 {
+    type = string
+    default = "10.0.1.0/24"
+}
+variable websubnet2 {
+    type = string
+    default = "10.0.2.0/24"
+}
+variable appsubnet1 {
+    type = string
+    default = "10.0.3.0/24"
+}
+variable appsubnet2 {
+    type = string
+    default = "10.0.4.0/24"
+}
+variable dbsubnet1 {
+    type = string
+    default = "10.0.5.0/24"
+}
+variable dbsubnet2 {
+    type = string
+    default = "10.0.6.0/24"
+}
+
+#if you change cidr block make sure you update addresses in python and shell scripts.
+variable frontendip {
+    default = "10.0.1.10"
+}
+variable checkoutip {
+    default = "10.0.3.10"
+}
+variable adip {
+    default = "10.0.3.11"
+}
+variable recommendationip {
+    default = "10.0.3.12"
+}
+variable paymentip {
+    default = "10.0.3.13"
+}
+variable emailip {
+    default = "10.0.3.14"
+}
+variable productcatalogip {
+    default = "10.0.3.15"
+}
+variable shippingip {
+    default = "10.0.3.16"
+}
+variable currencyip {
+    default = "10.0.3.17"
+}
+variable cartip {
+    default = "10.0.3.18"
+}
+variable redisip {
+    default = "10.0.5.10"
 }

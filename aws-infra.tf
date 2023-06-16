@@ -1,57 +1,75 @@
 #Create VPC network (if you change cidr block make sure you update resolver in nginx conf file)
-resource "aws_vpc" "safe-vpc-network" {
+resource "aws_vpc" "aws-demo-app" {
   cidr_block    = "10.0.0.0/16"
   tags = {
-    Name = "microservices-ec2-vpc"
+     Name = format("%s-%s",var.cec,"aws-demo-app")
   }
 }
 resource "aws_flow_log" "cswflowlogs" {
   log_destination      = var.csws3arn
   log_destination_type = "s3"
   traffic_type         = "ALL"
-  vpc_id               = aws_vpc.safe-vpc-network.id
+  vpc_id               = aws_vpc.aws-demo-app.id
   log_format = "$${account-id} $${action} $${bytes} $${dstaddr} $${dstport} $${end} $${instance-id} $${interface-id} $${log-status} $${packets} $${pkt-dstaddr} $${pkt-srcaddr} $${protocol} $${srcaddr} $${srcport} $${start} $${subnet-id} $${tcp-flags} $${type} $${version} $${vpc-id} $${flow-direction}"
 }
 
 #Create subnets in VPC network
 resource "aws_subnet" "websubnet1" {
-  vpc_id            = aws_vpc.safe-vpc-network.id
+  vpc_id            = aws_vpc.aws-demo-app.id
   availability_zone = var.az1
-  cidr_block        = "10.0.1.0/24"
+  cidr_block        = var.websubnet1
+  tags = {
+     Name = format("%s-%s",var.cec,"websubnet1")
+  }
 }
 resource "aws_subnet" "websubnet2" {
-  vpc_id            = aws_vpc.safe-vpc-network.id
+  vpc_id            = aws_vpc.aws-demo-app.id
   availability_zone = var.az2
-  cidr_block        = "10.0.2.0/24"
+  cidr_block        = var.websubnet2
+  tags = {
+     Name = format("%s-%s",var.cec,"websubnet2")
+  }
 }
 
 resource "aws_subnet" "appsubnet1" {
-  vpc_id            = aws_vpc.safe-vpc-network.id
+  vpc_id            = aws_vpc.aws-demo-app.id
   availability_zone = var.az1
-  cidr_block        = "10.0.3.0/24"
+  cidr_block        = var.appsubnet1
+  tags = {
+     Name = format("%s-%s",var.cec,"appsubnet1")
+  }
 }
 resource "aws_subnet" "appsubnet2" {
-  vpc_id            = aws_vpc.safe-vpc-network.id
+  vpc_id            = aws_vpc.aws-demo-app.id
   availability_zone = var.az2
-  cidr_block        = "10.0.4.0/24"
+  cidr_block        = var.appsubnet2
+  tags = {
+     Name = format("%s-%s",var.cec,"appsubnet2")
+  }
 }
 
 resource "aws_subnet" "dbsubnet1" {
-  vpc_id            = aws_vpc.safe-vpc-network.id
+  vpc_id            = aws_vpc.aws-demo-app.id
   availability_zone = var.az1
-  cidr_block        = "10.0.5.0/24"
+  cidr_block        = var.dbsubnet1
+  tags = {
+     Name = format("%s-%s",var.cec,"dbsubnet1")
+  }
 }
 resource "aws_subnet" "dbsubnet2" {
-  vpc_id            = aws_vpc.safe-vpc-network.id
+  vpc_id            = aws_vpc.aws-demo-app.id
   availability_zone = var.az2
-  cidr_block        = "10.0.6.0/24"
+  cidr_block        = var.dbsubnet2
+  tags = {
+     Name = format("%s-%s",var.cec,"dbsubnet2")
+  }
 }
 
 #Create internet gateway
 resource "aws_internet_gateway" "internetgateway" {
-  vpc_id = aws_vpc.safe-vpc-network.id
+  vpc_id = aws_vpc.aws-demo-app.id
   tags = {
-    Name = "SafeIGW"
+    Name = format("%s-%s",var.cec,"internetgateway")
   }
 }
 
@@ -63,7 +81,7 @@ resource "aws_nat_gateway" "natgateway1" {
   allocation_id = aws_eip.nateip1.id
   subnet_id     = aws_subnet.websubnet1.id
   tags = {
-    Name = "safeNATGW"
+    Name = format("%s-%s",var.cec,"NATGW")
   }
   depends_on = [aws_internet_gateway.internetgateway]
 }
@@ -74,14 +92,14 @@ resource "aws_nat_gateway" "natgateway2" {
   allocation_id = aws_eip.nateip2.id
   subnet_id     = aws_subnet.websubnet2.id
   tags = {
-    Name = "safeNATGW"
+    Name = format("%s-%s",var.cec,"NATGW")
   }
   depends_on = [aws_internet_gateway.internetgateway]
 }
 
 #Route tables
 resource "aws_route_table" "webRT" {
-  vpc_id = aws_vpc.safe-vpc-network.id
+  vpc_id = aws_vpc.aws-demo-app.id
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_internet_gateway.internetgateway.id
@@ -100,7 +118,7 @@ resource "aws_route_table_association" "webRTtowebsubnet2" {
 }
 
 resource "aws_route_table" "appRT1" {
-  vpc_id = aws_vpc.safe-vpc-network.id
+  vpc_id = aws_vpc.aws-demo-app.id
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_nat_gateway.natgateway1.id
@@ -115,7 +133,7 @@ resource "aws_route_table_association" "appRT1toappsubnet1" {
 }
 
 resource "aws_route_table" "appRT2" {
-  vpc_id = aws_vpc.safe-vpc-network.id
+  vpc_id = aws_vpc.aws-demo-app.id
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_nat_gateway.natgateway2.id
@@ -130,7 +148,7 @@ resource "aws_route_table_association" "appRT2toappsubnet2" {
 }
 
 resource "aws_route_table" "dbRT1" {
-  vpc_id = aws_vpc.safe-vpc-network.id
+  vpc_id = aws_vpc.aws-demo-app.id
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_nat_gateway.natgateway1.id
@@ -145,7 +163,7 @@ resource "aws_route_table_association" "dbRT1todbsubnet1" {
 }
 
 resource "aws_route_table" "dbRT2" {
-  vpc_id = aws_vpc.safe-vpc-network.id
+  vpc_id = aws_vpc.aws-demo-app.id
   route {
     cidr_block = "0.0.0.0/0"
     gateway_id = aws_nat_gateway.natgateway2.id
@@ -160,9 +178,9 @@ resource "aws_route_table_association" "dbRT2todbsubnet2" {
 }
 
 resource "aws_security_group" "allow_safe_access" {
-  name        = "allow_safe_access"
+  name         = format("%s-%s",var.cec,"allow_safe_access")
   description = "Allow inbound traffic"
-  vpc_id      = aws_vpc.safe-vpc-network.id
+  vpc_id      = aws_vpc.aws-demo-app.id
 
   ingress {
     description      = "all access"
@@ -198,7 +216,7 @@ data "template_cloudinit_config" "frontendconfig" {
 }
 resource "aws_network_interface" "frontend" {
   subnet_id   = aws_subnet.websubnet1.id
-  private_ips = ["10.0.1.10"]
+  private_ips = [var.frontendip]
   security_groups   = [aws_security_group.allow_safe_access.id]
   tags = {
     Name = "frontend"
@@ -243,7 +261,7 @@ data "template_cloudinit_config" "checkoutconfig" {
 }
 resource "aws_network_interface" "checkout" {
   subnet_id   = aws_subnet.appsubnet1.id
-  private_ips = ["10.0.3.10"]
+  private_ips = [var.checkoutip]
   security_groups   = [aws_security_group.allow_safe_access.id]
   tags = {
     Name = "checkout"
@@ -279,7 +297,7 @@ data "template_cloudinit_config" "adconfig" {
 }
 resource "aws_network_interface" "ad" {
   subnet_id   = aws_subnet.appsubnet1.id
-  private_ips = ["10.0.3.11"]
+  private_ips = [var.adip]
   security_groups   = [aws_security_group.allow_safe_access.id]
   tags = {
     Name = "ad"
@@ -314,7 +332,7 @@ data "template_cloudinit_config" "recommendationconfig" {
 }
 resource "aws_network_interface" "recommendation" {
   subnet_id   = aws_subnet.appsubnet1.id
-  private_ips = ["10.0.3.12"]
+  private_ips = [var.recommendationip]
   security_groups   = [aws_security_group.allow_safe_access.id]
   tags = {
     Name = "recommendation"
@@ -349,7 +367,7 @@ data "template_cloudinit_config" "paymentconfig" {
 }
 resource "aws_network_interface" "payment" {
   subnet_id   = aws_subnet.appsubnet1.id
-  private_ips = ["10.0.3.13"]
+  private_ips = [var.paymentip]
   security_groups   = [aws_security_group.allow_safe_access.id]
   tags = {
     Name = "payment"
@@ -384,7 +402,7 @@ data "template_cloudinit_config" "emailsconfig" {
 }
 resource "aws_network_interface" "emails" {
   subnet_id   = aws_subnet.appsubnet1.id
-  private_ips = ["10.0.3.14"]
+  private_ips = [var.emailip]
   security_groups   = [aws_security_group.allow_safe_access.id]
   tags = {
     Name = "emails"
@@ -419,7 +437,7 @@ data "template_cloudinit_config" "productcatalogconfig" {
 }
 resource "aws_network_interface" "productcatalog" {
   subnet_id   = aws_subnet.appsubnet1.id
-  private_ips = ["10.0.3.15"]
+  private_ips = [var.productcatalogip]
   security_groups   = [aws_security_group.allow_safe_access.id]
   tags = {
     Name = "productcatalog"
@@ -454,7 +472,7 @@ data "template_cloudinit_config" "shippingconfig" {
 }
 resource "aws_network_interface" "shipping" {
   subnet_id   = aws_subnet.appsubnet1.id
-  private_ips = ["10.0.3.16"]
+  private_ips = [var.shippingip]
   security_groups   = [aws_security_group.allow_safe_access.id]
   tags = {
     Name = "shipping"
@@ -489,7 +507,7 @@ data "template_cloudinit_config" "currencyconfig" {
 }
 resource "aws_network_interface" "currency" {
   subnet_id   = aws_subnet.appsubnet1.id
-  private_ips = ["10.0.3.17"]
+  private_ips = [var.currencyip]
   security_groups   = [aws_security_group.allow_safe_access.id]
   tags = {
     Name = "currency"
@@ -524,7 +542,7 @@ data "template_cloudinit_config" "cartconfig" {
 }
 resource "aws_network_interface" "cart" {
   subnet_id   = aws_subnet.appsubnet1.id
-  private_ips = ["10.0.3.18"]
+  private_ips = [var.cartip]
   security_groups   = [aws_security_group.allow_safe_access.id]
   tags = {
     Name = "cart"
@@ -559,7 +577,7 @@ data "template_cloudinit_config" "redisconfig" {
 }
 resource "aws_network_interface" "redis" {
   subnet_id   = aws_subnet.dbsubnet1.id
-  private_ips = ["10.0.5.10"]
+  private_ips = [var.redisip]
   security_groups   = [aws_security_group.allow_safe_access.id]
   tags = {
     Name = "redis"
