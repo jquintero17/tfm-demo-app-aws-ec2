@@ -13,43 +13,43 @@ def main():
     displaytext= ""
     response = requests.get("http://10.0.3.10:8989/checkout")
     if response.status_code == 200:
-        checkoutresponse= response.text
+        checkoutresponse= "200 OK"
     else:
         checkoutresponse= "[{Error:'Checkout endpoint is not responding!!'}]"
 
     response = requests.get("http://10.0.3.11:8990/ad")
     if response.status_code == 200:
-        adresponse= response.text
+        adresponse= "200 OK"
     else:
         adresponse== "[{Error:'ad endpoint is not responding!!'}]"
 
     response = requests.get("http://10.0.3.12:8991/recommend")
     if response.status_code == 200:
-        recommendresponse= response.text
+        recommendresponse= "200 OK"
     else:
         recommendresponse = "[{Error:'Recommend endpoint is not responding!!'}]"
 
     response = requests.get("http://10.0.3.15:8994/productcatalog")
     if response.status_code == 200:
-        productcatalogresponse= response.text
+        productcatalogresponse= "200 OK"
     else:
         productcatalogresponse= "[{Error: 'Productcatalog endpoint is not responding!!'}]"
 
     response = requests.get("http://10.0.3.16:8995/shipping")
     if response.status_code == 200:
-        shippingresponse= response.text
+        shippingresponse= "200 OK"
     else:
         shippingresponse= "[{Error: 'shipping endpoint is not responding!!'}]"
 
     response = requests.get("http://10.0.3.17:8996/currency")
     if response.status_code == 200:
-        currencyresponse= response.text
+        currencyresponse= "200 OK"
     else:
         currencyresponse= "[{Error: 'Currency endpoint is not responding!!'}]"
 
     response = requests.get("http://10.0.3.18:8997/carts")
     if response.status_code == 200:
-        cartsresponse= response.text
+        cartsresponse= "200 OK"
     else:
         cartsresponse= "[{Error: 'Currency endpoint is not responding!!'}]"
 
